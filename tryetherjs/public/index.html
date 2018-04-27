@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Aura Decentralized Profile">
+<meta name="author" content="Dmytro Selin">
+  <title>AuraProfile prototype</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+  <link href="css/main.css" rel="stylesheet">
+  <link href="css/font-awesome.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<div id="app">
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">Aura home</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home
+              <span class="sr-only">(current)</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">About</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Services</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="container">
+    <div class="row">
+      <div v-if="alert" class="alert alert-danger">{{alert}}}</div>
+      <div v-if="success" class="alert alert-success">{{success}}</div>
+    </div>
+    <div class="row">
+
+      <div class="col-lg-3">
+        <h1 class="my-4">AuraProfile</h1>
+        <div class="list-group">
+          <a href="#" class="list-group-item" :class="{active:viewactive}" @click="selectMenu('view')">View Profile</a>
+          <a href="#" class="list-group-item" :class="{active:editactive}" @click="selectMenu('edit')">Edit Profile</a>
+          <a href="#" class="list-group-item">History</a>
+          <a href="#" class="list-group-item">Jobs</a>
+        </div>
+      </div>
+      <!-- /.col-lg-3 -->
+      <div class="col-lg-9">
+        <div class="view-wrapper" v-if="viewactive">
+          <div class="card mt-4">
+            <div class="card-body">
+              <img class="img-fluid" src="http://placehold.it/150x150" alt="">
+              <h3 class="card-title">{{profile.name}}</h3>
+              <h4>Balance: {{profile.balance}}, Score: {{profile.score}}</h4>
+              <p class="card-text">{{profile.description}}</p>
+              <span class="text-warning">{{profile.contact}}</span>
+              <div>  <a href="#" class="btn btn-info" @click="fetchProfile">Load Profile</a>
+              </div>
+            </div>
+          </div>
+          <!-- /.card -->
+
+          <div class="card card-outline-secondary my-4">
+            <div class="card-header">
+              Skills
+            </div>
+            <div class="card-body">
+              <ul><li v-for="hardskill in profile.hardskills">{{hardskill.name}}: {{hardskill.level}}</li></ul>
+              <small class="text-muted">hardskills</small>
+              <hr>
+              <ul><li v-for="softskill in profile.softskills">{{softskill.name}}: {{softskill.level}}</li></ul>
+              <small class="text-muted">softskills</small>
+              <hr>
+              <ul><li v-for="interest in profile.interests">{{interest.name}}: {{interest.level}}</li></ul>
+              <small class="text-muted">interests</small>
+              <hr>
+              <!--a href="#" class="btn btn-success">Leave a Review</a-->
+              <a href="#" class="btn btn-info" @click="fetchProfile">Load profile</a>
+            </div>
+          </div>
+          <!-- /.card -->
+        </div>
+        <div class="edit-wrapper" v-if="editactive">
+
+            <div class="card mt-4">
+              <div class="card-body">
+                <form>
+                  <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Name</label>
+                    <div class="col-sm-10">
+                      <input type="text" name="Name" v-model="profile.name" class="form-control">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Contact</label>
+                    <div class="col-sm-10">
+                      <input type="text" name="Contact" v-model="profile.contact" class="form-control">
+                    </div>
+                  </div>
+                </form>
+                <a href="#" class="btn btn-info" @click="fetchProfile">Load Profile</a>
+                <a href="#" class="btn btn-success" @click="saveProfile">Save main data</a>
+              </div>
+            </div>
+            <!-- /.card -->
+
+            <div class="card card-outline-secondary my-4">
+              <div class="card-header">
+                Skills
+              </div>
+              <div class="card-body">
+                <list v-bind:items="profile.hardskills" v-on:new_item="AddHardSkill"></list>
+                <small class="text-muted">hardskills</small>
+                <hr>
+                <ul><li v-for="softskill in profile.softskills">{{softskill.name}}: {{softskill.level}}</li></ul>
+                <small class="text-muted">softskills</small>
+                <hr>
+                <ul><li v-for="interest in profile.interests">{{interest.name}}: {{interest.level}}</li></ul>
+                <small class="text-muted">interests</small>
+                <hr>
+                <a href="#" class="btn btn-info" @click="fetchProfile">Load Profile</a>
+              </div>
+            </div>
+            <!-- /.card -->
+        </div>
+      </div>
+        <!-- /.col-lg-9 -->
+
+    </div>
+
+  </div>
+  <!-- /.container -->
+</div>
+  <!-- Footer -->
+  <footer class="py-5 bg-dark">
+    <div class="container">
+      <p class="m-0 text-center text-white">Copyright &copy; AuraProfile 2018</p>
+    </div>
+    <!-- /.container -->
+  </footer>
+
+</body>
+<!--script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script-->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+<script charset="utf-8"
+        src="https://cdn.ethers.io/scripts/ethers-v2.min.js"
+        type="text/javascript">
+</script>
+<script>
+
+Vue.component('list-item',{
+  template:'<li>{{name}}: {{level}} <button v-on:click="$emit(\'remove\')">X</button></li>',
+  props:['name','level']
+});
+Vue.component('list',{
+  template:'<div class="list">\
+  <div v-if="alert" class="alert alert-danger">Can not delete items for now</div>\
+  <input type="text" v-model="new_item" placeholder="add new" v-on:keyup.enter="add_new"></input>\
+  <ul><li is="list-item" v-for="(item,index) in items" v-bind:key="item.name" v-bind:name="item.name" v-bind:level="item.level" v-on:remove="remove_item(index,item)"></li></ul>\
+  </div>',
+  props:['items'],
+  data:function(){
+    return {
+      new_item:'',
+      alert:false
+    }
+  },
+  methods:{
+    add_new:function(){
+      const item = {name:this.new_item,level:1};
+      this.items.push(item);
+      this.new_item = '';
+      this.$emit('new_item',item);
+    },
+    remove_item:function(index, item){
+      this.alert = true;
+      const that = this;
+      setTimeout(()=>{console.log('aa');that.alert = false;},2000);
+      //this.items.splice(index,1)
+    }
+  }
+});
+
+const abi = [{"constant":false,"inputs":[{"name":"addr","type":"address"},{"name":"new_score","type":"uint64"}],"name":"UpdateScore","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"key","type":"uint64"},{"name":"addr","type":"address"}],"name":"ClaimProfile","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"addr","type":"address"}],"name":"GetScore","outputs":[{"name":"","type":"uint64"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"addr","type":"address"}],"name":"GetBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"name","type":"string"},{"name":"level","type":"uint16"}],"name":"AddInterest","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint64"}],"name":"unclaimed_profiles","outputs":[{"name":"name","type":"string"},{"name":"contact","type":"string"},{"name":"balance","type":"uint256"},{"name":"score","type":"uint64"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"key","type":"uint64"}],"name":"GetUnclaimedProfile","outputs":[{"components":[{"name":"name","type":"string"},{"name":"contact","type":"string"},{"name":"balance","type":"uint256"},{"name":"score","type":"uint64"},{"components":[{"name":"name","type":"string"},{"name":"level","type":"uint16"}],"name":"hardskills","type":"tuple[]"},{"components":[{"name":"name","type":"string"},{"name":"level","type":"uint16"}],"name":"softskills","type":"tuple[]"},{"components":[{"name":"name","type":"string"},{"name":"level","type":"uint16"}],"name":"interests","type":"tuple[]"}],"name":"","type":"tuple"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"name","type":"string"},{"name":"level","type":"uint16"}],"name":"AddHardSkill","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"name","type":"string"},{"name":"level","type":"uint16"}],"name":"AddSoftSkill","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"key","type":"uint64"},{"name":"name","type":"string"},{"name":"level","type":"uint16"}],"name":"AddHardSkillToUnclaimed","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"key","type":"uint64"},{"name":"name","type":"string"},{"name":"level","type":"uint16"}],"name":"AddSoftSkillToUnclaimed","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"name","type":"string"},{"name":"contact","type":"string"}],"name":"AddProfile","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"addr","type":"address"}],"name":"GetProfile","outputs":[{"components":[{"name":"name","type":"string"},{"name":"contact","type":"string"},{"name":"balance","type":"uint256"},{"name":"score","type":"uint64"},{"components":[{"name":"name","type":"string"},{"name":"level","type":"uint16"}],"name":"hardskills","type":"tuple[]"},{"components":[{"name":"name","type":"string"},{"name":"level","type":"uint16"}],"name":"softskills","type":"tuple[]"},{"components":[{"name":"name","type":"string"},{"name":"level","type":"uint16"}],"name":"interests","type":"tuple[]"}],"name":"","type":"tuple"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"key","type":"uint64"},{"name":"name","type":"string"},{"name":"contact","type":"string"}],"name":"AddUnclaimedProfile","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"name","type":"string"},{"name":"contact","type":"string"}],"name":"SaveProfile","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"new_editor","type":"address"}],"name":"SetEditor","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"profiles","outputs":[{"name":"name","type":"string"},{"name":"contact","type":"string"},{"name":"balance","type":"uint256"},{"name":"score","type":"uint64"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"addr","type":"address"},{"name":"new_ballance","type":"uint256"}],"name":"UpdateBalance","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"key","type":"uint64"},{"name":"name","type":"string"},{"name":"level","type":"uint16"}],"name":"AddInterestToUnclaimed","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"msg","type":"string"}],"name":"Error","type":"event"}];
+
+
+const contract_addr = '0xd80703dac05b62db605896f364df542b00597774';
+let myaddr = null
+let provider = null;
+let contract = null;
+let web3contract = null;
+window.addEventListener("load", function(event) {
+  provider = new ethers.providers.Web3Provider( web3.currentProvider);
+  contract =  new ethers.Contract(contract_addr, abi, provider);
+  console.log('web3 loaded, my addr',web3.eth.accounts[0]);
+  myaddr = web3.eth.accounts[0];
+  web3.eth.defaultAccount = web3.eth.accounts[0];
+  const web3ContractTemplate = web3.eth.contract(abi);
+  web3contract = web3ContractTemplate.at(contract_addr);
+});
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    selection:'view',
+    alert:'',
+    success:'',
+    profile:{
+      name:"empty name",
+      contact:"empty contact",
+      balance:0,
+      score:0,
+      description: 'some long description. which are in doubt if needed to be saved in blockchain ever',
+      hardskills:[],//{name:'c#',level:1},{name:'javascript',level:2},{name:'solidity',level:1}
+      softskills:[],//{name:'leadership',level:2},{name:'public speaking', level:1}
+      interests:[]//{name:'fishing', level:1},{name:'motocycles',level:2}
+    }
+  },
+  computed:{
+    viewactive:function(){return this.selection == 'view'},
+    editactive:function(){return this.selection == 'edit'}
+  },
+  methods:{
+    selectMenu:function(selection){
+      this.selection = selection;
+    },
+    fetchProfile: function(){
+
+      contract.GetProfile(myaddr).then(res => {
+        console.log('hardskills',res[0].hardskills);
+        this.profile.name = res[0].name;
+        this.profile.contact = res[0].contact;
+        this.profile.balance = res[0].balance.toNumber();
+        this.profile.score = res[0].score.toNumber();
+        this.profile.hardskills = res[0].hardskills;
+        this.profile.softskills = res[0].softskills;
+        this.profile.interests = res[0].interests;
+        //const hardskills = res[0].hardskills;
+        //const softskills = res[0].softskills;
+        //const interests = res[0].interests;
+        //console.log({name,contact,balance,score,hardskills,softskills,interests});
+      }).catch(e => console.log(e));
+    },
+    AddHardSkill:function(skill){
+      web3contract.AddHardSkill(skill.name, skill.level,(err,res)=>{
+        console.log('add hard skill done', err, res);
+        if(err){
+          this.showAlert('error saving hardskill '+err);
+        }
+        else{
+          this.showSuccess('successfully saved hardskill, tx='+res);
+        }
+      });
+    },
+    AddSoftSkill:function(skill){
+      console.log('add softskill', {name: skill.name, level:skill.level});
+      web3contract.AddSoftSkill(skill.name, skill.level,(err,res)=>{
+        if(err){
+          this.showAlert('error saving softskill '+err);
+        }
+        else{
+          this.showSuccess('successfully saved softskill, tx='+res);
+        }
+      });
+    },
+    AddInterest:function(interest){
+      console.log('add interest', {name: interest.name, level:interest.level});
+      web3contract.AddInterestSkill(interest.name, interest.level,(err,res)=>{
+        if(err){
+          this.showAlert('error saving interest '+err);
+        }
+        else{
+          this.showSuccess('successfully saved interest, tx='+res);
+        }
+      });
+    },
+    saveProfile: function(){
+//      const provider = new ethers.providers.Web3Provider( web3.currentProvider);
+  //    const contract =  new ethers.Contract(addr, abi, provider);
+      console.log('saveProfile');
+      console.log(this.profile.name, this.profile.contact);
+      web3contract.AddProfile(this.profile.name, this.profile.contact, (err,res)=>{
+        if(err){
+          this.showAlert('error saving profile '+err);
+        }
+        else{
+          this.showSuccess('successfully saved profile, tx='+res);
+        }
+      });
+//      .then(res => this.showSuccess('saved profile successfully'))
+//      .catch(e => this.showAlert('failed to save profile '+e.message));
+
+    },
+    showSuccess:function(msg){
+      this.success = msg;
+      setTimeout(() => this.success = '', 2000);
+    },
+    showAlert:function(msg){
+      this.alert = msg;
+      setTimeout(() => this.alert = '', 2000);
+    }
+  }
+})
+</script>
+</html>
